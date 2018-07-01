@@ -29,6 +29,12 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    setSignoutTimer({commit}, expirationTime) {
+      setTimeout(() => {
+        console.log('timed out')
+        commit('CLEAR_USER')
+      }, expirationTime * 1000);
+    },
     signUp ({commit, dispatch}, authData) {
       console.log('signing up')
         axiosAuth.post(`/signupNewUser?key=${settings.api_key}`, {
@@ -42,7 +48,7 @@ export default new Vuex.Store({
           })
           .catch(error => console.log(error));
     },
-    signIn ({commit}, authData) {
+    signIn ({commit, dispatch}, authData) {
       console.log('signing in')
       axiosAuth.post(`/verifyPassword?key=${settings.api_key}`, {
         email: authData.email,
@@ -51,6 +57,7 @@ export default new Vuex.Store({
       })
         .then(res => {
           commit('AUTH_USER', {idToken: res.data.idToken, userId: res.data.localId});
+          dispatch('setSignoutTimer', res.data.expiresIn);
         })
         .catch(error => console.log(error));
     },
