@@ -4,6 +4,8 @@ import axiosAuth from './axios-auth'
 import axios from 'axios'
 import settings from './settings'
 
+import router from './router'
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -20,6 +22,10 @@ export default new Vuex.Store({
     },
     STORE_USER (state, user) {
       state.user = user
+    },
+    CLEAR_USER (state) {
+      state.idToken = null;
+      state.userId = null;
     }
   },
   actions: {
@@ -37,16 +43,20 @@ export default new Vuex.Store({
           .catch(error => console.log(error));
     },
     signIn ({commit}, authData) {
-        console.log('signing in')
-        axiosAuth.post(`/verifyPassword?key=${settings.api_key}`, {
-          email: authData.email,
-          password: authData.password,
-          returnSecureToken: true
+      console.log('signing in')
+      axiosAuth.post(`/verifyPassword?key=${settings.api_key}`, {
+        email: authData.email,
+        password: authData.password,
+        returnSecureToken: true
+      })
+        .then(res => {
+          commit('AUTH_USER', {idToken: res.data.idToken, userId: res.data.localId});
         })
-          .then(res => {
-            commit('AUTH_USER', {idToken: res.data.idToken, userId: res.data.localId});
-          })
-          .catch(error => console.log(error));
+        .catch(error => console.log(error));
+    },
+    signOut ({commit}) {
+      commit('CLEAR_USER');
+      router.replace('/signin');
     },
     storeUser ({commit, state}, user) {
       if (!state.idToken) {
