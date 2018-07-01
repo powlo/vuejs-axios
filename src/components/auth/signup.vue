@@ -69,6 +69,9 @@
 </template>
 
 <script>
+  import axios from '../../axios-auth';
+  import settings from '../../settings.json';
+  
   export default {
     data () {
       return {
@@ -102,7 +105,7 @@
           hobbies: this.hobbyInputs.map(hobby => hobby.value),
           terms: this.terms
         }
-        console.log(formData)
+        this.$store.dispatch('signUp', formData)
       }
     }
   }
